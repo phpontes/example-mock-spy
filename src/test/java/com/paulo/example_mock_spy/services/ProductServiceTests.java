@@ -14,6 +14,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import com.paulo.example_mock_spy.dto.ProductDTO;
 import com.paulo.example_mock_spy.entities.Product;
 import com.paulo.example_mock_spy.repositories.ProductRepository;
+import com.paulo.example_mock_spy.services.exceptions.InvalidDataException;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -57,4 +58,31 @@ public class ProductServiceTests {
 		Assertions.assertEquals(result.getName(), "Preisteishon");
 	}
 	
+	@Test
+	public void insertShouldReturnInvalidDataExceptionWhenProductNameIsBlank() {
+		
+		productDTO.setName("");
+		
+		ProductService serviceSpy = Mockito.spy(service);
+		Mockito.doThrow(InvalidDataException.class).when(serviceSpy).validateData(productDTO);
+		
+		Assertions.assertThrows(InvalidDataException.class, () -> {
+			@SuppressWarnings("unused")
+			ProductDTO result = serviceSpy.insert(productDTO);
+		});
+	}
+	
+	@Test
+	public void insertShouldReturnInvalidDataExceptionWhenProductPriceIsNegativeOrZero() {
+		
+		productDTO.setPrice(-5.0);
+		
+		ProductService serviceSpy = Mockito.spy(service);
+		Mockito.doThrow(InvalidDataException.class).when(serviceSpy).validateData(productDTO);
+		
+		Assertions.assertThrows(InvalidDataException.class, () -> {
+			@SuppressWarnings("unused")
+			ProductDTO result = serviceSpy.insert(productDTO);
+		});
+	}
 }
